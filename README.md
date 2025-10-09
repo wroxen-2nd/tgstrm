@@ -237,7 +237,7 @@ All environment variables for this project are defined in the `config.env` file.
 
 | Variable | Description |
 | :--- | :--- |
-| **`BASE_URL`** | The Public IP of your server or domain or heroku app URL (e.g. `http://182.xxx.xxx.xxx` or `https://your-domain.com`). Crucial for Stremio addon setup. |
+| **`BASE_URL`** | The Domain or Heroku app URL (e.g. `https://your-domain.com`). Crucial for Stremio addon setup. |
 | **`PORT`** | The port number on which your FastAPI server will run. *Default: `8000`*. |
 
 ### 🔄 Update Settings
@@ -424,7 +424,7 @@ If you want to use **only** your **Telegram Stremio Media Server addon** for met
 ### 2️⃣ Step 2: Remove “Cinemeta” Protection
 
 1.  Log in to your **Stremio account** via your **web browser**:
-    👉 [https://app.strem.io/shell-v4.4/\#/](https://app.strem.io/shell-v4.4/#/)
+    👉 [https://web.stremio.com/](https://web.stremio.com/)
 2.  Once logged in, open your **browser console** (`Ctrl + Shift + J` on Windows/Linux or `Cmd + Option + J` on macOS).
 3.  Copy and paste the code below into the console and press **Enter**:
 
