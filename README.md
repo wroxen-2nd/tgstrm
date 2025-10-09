@@ -286,7 +286,7 @@ This guide will help you deploy your **Telegram Stremio Media Server** using eit
 Before you begin, ensure you have:
 
 1.  ✅ A **VPS** with a public IP (e.g., Ubuntu on DigitalOcean, AWS, Vultr, etc.)
-2.  ✅ A **Domain name** (Optional but Recommended)
+2.  ✅ A **Domain name**
 
 
 ## 🐙 Heroku Guide
@@ -322,7 +322,7 @@ Your Code should now be running at:  
 
 -----
 
-### 🌐 Step 3: Add Domain (Optional but Recommended)
+### 🌐 Step 3: Add Domain
 
 #### A. Set Up DNS Records
 
@@ -408,7 +408,6 @@ Download Stremio for your device:
 | Deployment Method | Addon URL |
 | :--- | :--- |
 | **Heroku** | `https://<your-heroku-app>.herokuapp.com/stremio/manifest.json` |
-| **VPS (IP)** | `http://<your-server-ip>:8000/stremio/manifest.json` |
 | **Custom Domain** | `https://<your-domain>/stremio/manifest.json` |
 
 
