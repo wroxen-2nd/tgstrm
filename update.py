@@ -30,7 +30,7 @@ basicConfig(handlers=[file_handler, stream_handler], level=INFO)
 load_dotenv("config.env")
 
 UPSTREAM_REPO = environ.get("UPSTREAM_REPO", "").strip() or None
-UPSTREAM_BRANCH = environ.get("UPSTREAM_BRANCH", "").strip() or "main"
+UPSTREAM_BRANCH = environ.get("UPSTREAM_BRANCH", "").strip() or "master"
 
 if UPSTREAM_REPO:
     if Path(".git").exists():
