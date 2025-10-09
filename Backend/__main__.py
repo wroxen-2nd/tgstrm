@@ -4,6 +4,7 @@ import logging
 from traceback import format_exc
 from pyrogram import idle
 from Backend import __version__, db
+from Backend.helper.pinger import ping
 from Backend.logger import LOGGER
 from Backend.fastapi import server
 from Backend.helper.pyro import restart_notification, setup_bot_commands
@@ -40,7 +41,8 @@ async def start_services():
         LOGGER.info('Initializing Telegram-Stremio Web Server...')
         await restart_notification()
         loop.create_task(server.serve())
-
+        loop.create_task(ping())
+        
         LOGGER.info("Telegram-Stremio Started Successfully!")
         await idle()
     except Exception:

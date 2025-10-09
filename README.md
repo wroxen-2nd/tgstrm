@@ -293,7 +293,7 @@ Before you begin, ensure you have:
 
 Follow the instructions provided in the Google Colab Tool to deploy on Heroku.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/weebzone/Colab-Tools/blob/main/telegram%20media%20server.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/weebzone/Colab-Tools/blob/main/telegram%20stremio.ipynb)
 
 
 ## 🐳 VPS Guide
