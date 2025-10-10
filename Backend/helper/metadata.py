@@ -63,7 +63,7 @@ async def metadata(filename: str, channel: int, msg_id) -> dict | None:
         return None
     
     # Skip multipart or split files like part1, cd2, disk1, etc.
-    multipart_pattern = compile(r'(?:part|cd|disc|disk)[s._-]*0d+', IGNORECASE)
+    multipart_pattern = compile(r'(?:part|cd|disc|disk)[s._-]*\d+(?=\.\w+$)', IGNORECASE)
     if multipart_pattern.search(filename):
         LOGGER.info(f"Skipping {filename}: seems to be a split/multipart file")
         return None
