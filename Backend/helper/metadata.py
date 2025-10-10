@@ -1,6 +1,7 @@
 import asyncio
 import traceback
 import PTN
+from re import compile, IGNORECASE
 
 from Backend.helper.imdb import get_detail, get_season, search_title
 from Backend.helper.pyro import extract_tmdb_id
@@ -59,6 +60,12 @@ async def metadata(filename: str, channel: int, msg_id) -> dict | None:
     # Skip combined/invalid files
     if "excess" in parsed and any("combined" in item.lower() for item in parsed["excess"]):
         LOGGER.info(f"Skipping {filename}: contains 'combined'")
+        return None
+    
+    # Skip multipart or split files like part1, cd2, disk1, etc.
+    multipart_pattern = compile(r'(?:part|cd|disc|disk)[\s._-]*\d+', IGNORECASE)
+    if multipart_pattern.search(filename):
+        LOGGER.info(f"Skipping {filename}: seems to be a split/multipart file")
         return None
 
     title, season, episode, year, quality = (

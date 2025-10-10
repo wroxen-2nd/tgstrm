@@ -423,7 +423,7 @@ If you want to use **only** your **Telegram Stremio Media Server addon** for met
 
 ### 2️⃣ Step 2: Remove “Cinemeta” Protection
 
-1.  Log in to your **Stremio account** via your **web browser**:
+1.  Log in to your **Stremio account** using **Chrome or Chromium-based browser** :
     👉 [https://web.stremio.com/](https://web.stremio.com/)
 2.  Once logged in, open your **browser console** (`Ctrl + Shift + J` on Windows/Linux or `Cmd + Option + J` on macOS).
 3.  Copy and paste the code below into the console and press **Enter**:

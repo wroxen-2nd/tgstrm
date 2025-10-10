@@ -36,9 +36,7 @@ async def file_receive_handler(client: Client, message: Message):
         try:
             if message.video or (message.document and message.document.mime_type.startswith("video/")):
                 file = message.video or message.document
-
-                caption = message.caption
-                title = caption or file.file_name
+                title = message.caption or file.file_name
                 msg_id = message.id
                 size = get_readable_file_size(file.file_size)
                 channel = str(message.chat.id).replace("-100", "")
