@@ -330,7 +330,7 @@ Go to your domain's DNS settings and add the following **A record**:
 
 | Type | Name | Value             |
 |------|------|-------------------|
-| A    | *  | `195.xxx.xxx.xxx` |
+| A    | @  | `195.xxx.xxx.xxx` |
 
 #### B. Install Nginx & Certbot
 
