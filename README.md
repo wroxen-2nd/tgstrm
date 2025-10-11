@@ -330,57 +330,46 @@ Go to your domain's DNS settings and add the following **A record**:
 
 | Type | Name | Value             |
 |------|------|-------------------|
-| A    | @  | `195.xxx.xxx.xxx` |
+| A    | @    | `195.xxx.xxx.xxx` |
 
-#### B. Install Nginx & Certbot
+#### B. Install Caddy
 
 ```bash
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+chmod o+r /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+chmod o+r /etc/apt/sources.list.d/caddy-stable.list
 sudo apt update
-sudo apt install nginx certbot python3-certbot-nginx -y
+sudo apt install caddy
 ```
 
-#### C. Configure Nginx
+#### C. Configure Caddy
 
-1.  **Create a New Nginx Config:**
+1.  **Edit the Caddyfile:**
 
     ```bash
-    sudo nano /etc/nginx/sites-available/domain.com
+    sudo nano /etc/caddy/Caddyfile
     ```
 
-    Paste the following (replace `domain.com` with your domain):
+    Replace the contents with the following:
+    - Replace `domain.com` with your actual domain
+    - If you changed PORT in config.env from the default 8000, update the port accordingly
 
-    ```nginx
-    server {
-        listen 80;
-        server_name domain.com;
-
-        location / {
-            proxy_pass http://localhost:8000;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        }
+    ```caddy
+    domain.com {
+        reverse_proxy localhost:8000
     }
     ```
 
-2.  **Enable the Site:**
+    Press `Ctrl + O`, then `Enter`, then `Ctrl + X` to save and exit.
+
+2.  **Reload Caddy:**
 
     ```bash
-    sudo ln -s /etc/nginx/sites-available/domain.com /etc/nginx/sites-enabled/domain.com
-    ```
-3. **Reload Nginx:**
-
-    ```bash
-    sudo nginx -t
-    sudo systemctl restart nginx
+    sudo systemctl reload caddy
     ```
 
-
-#### D. Secure with HTTPS (Let's Encrypt)
-
-```bash
-sudo certbot --nginx -d domain.com
-```
 
 Your API is now available at:  
 ➡️ `https://domain.com`
