@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Tuple, Any
 from Backend.logger import LOGGER
 from Backend.config import Telegram
 import re
-from Backend.helper.encrypt import decode_string
+from Backend.helper.encrypt import decode_string, encode_string
 from Backend.helper.modal import Episode, MovieSchema, QualityDetail, Season, TVShowSchema
 from Backend.helper.task_manager import delete_message
 
@@ -87,41 +87,58 @@ class Database:
         return {"updated_on": DESCENDING}
 
     async def _paginate_collection(
-        self, collection_name: str, sort_dict: Dict[str, int],
-        page: int, page_size: int
-    ) -> Tuple[List[Any], List[int], int]:
+        self,
+        collection_name: str,
+        sort_dict: Dict[str, int],
+        page: int,
+        page_size: int,
+        filter_dict: Optional[dict] = None
+    ):
+        filter_dict = filter_dict or {}
         skip = (page - 1) * page_size
         results = []
-        dbs_checked = [self.current_db_index]
-        active_db_key = f"storage_{self.current_db_index}"
-        active_db = self.dbs[active_db_key]
-        total_active = await active_db[collection_name].count_documents({})
+        dbs_checked = []
+        total_count = 0
 
-        if skip < total_active:
-            cursor = active_db[collection_name].find({}).sort(sort_dict).skip(skip).limit(page_size)
-            results = await cursor.to_list(None)
-            remaining = page_size - len(results)
-            if remaining > 0 and self.current_db_index > 1:
-                prev_db_index = self.current_db_index - 1
-                prev_db_key = f"storage_{prev_db_index}"
-                prev_db = self.dbs[prev_db_key]
-                dbs_checked.append(prev_db_index)
-                prev_cursor = prev_db[collection_name].find({}).sort(sort_dict).limit(remaining)
-                results.extend(await prev_cursor.to_list(None))
-        else:
-            if self.current_db_index > 1:
-                prev_db_index = self.current_db_index - 1
-                prev_db_key = f"storage_{prev_db_index}"
-                prev_db = self.dbs[prev_db_key]
-                dbs_checked.append(prev_db_index)
-                cursor = prev_db[collection_name].find({}).sort(sort_dict).skip(skip - total_active).limit(page_size)
-                results = await cursor.to_list(None)
+        db_counts = []
+        for i in range(1, self.current_db_index + 1):
+            db_key = f"storage_{i}"
+            db = self.dbs[db_key]
+            count = await db[collection_name].count_documents(filter_dict)
+            db_counts.append((i, count))
+            total_count += count
 
-        total_prev = 0
-        if self.current_db_index > 1:
-            prev_db_key = f"storage_{self.current_db_index - 1}"
-            total_prev = await self.dbs[prev_db_key][collection_name].count_documents({})
-        total_count = total_active + total_prev
+        start_db_index = None
+        for db_index, count in reversed(db_counts):
+            if skip < count:
+                start_db_index = db_index
+                break
+            skip -= count
+
+        if not start_db_index:
+            return [], [], total_count
+
+        for db_index, count in reversed(db_counts):
+            if db_index < start_db_index:
+                continue
+
+            db_key = f"storage_{db_index}"
+            db = self.dbs[db_key]
+            dbs_checked.append(db_index)
+
+            cursor = (
+                db[collection_name]
+                .find(filter_dict)
+                .sort(sort_dict)
+                .skip(skip if db_index == start_db_index else 0)
+                .limit(page_size - len(results))
+            )
+
+            docs = await cursor.to_list(None)
+            results.extend(docs)
+
+            if len(results) >= page_size:
+                break
         return results, dbs_checked, total_count
 
     async def _move_document(
@@ -392,35 +409,35 @@ class Database:
             LOGGER.error(f"Failed to update TV show {tmdb_id} in {existing_db_key}: {e}")
             if any(keyword in str(e).lower() for keyword in ["storage", "quota"]):
                 return await self._handle_storage_error(self.update_tv_show, tv_show_data, total_storage_dbs=total_storage_dbs)
-
-    async def sort_tv_shows(
-        self, sort_params: List[Tuple[str, str]], page: int, page_size: int
-    ) -> dict:
+    
+    async def sort_movies(self, sort_params, page, page_size, genre_filter=None):
         sort_dict = self._get_sort_dict(sort_params)
-        results, dbs_checked, total_count = await self._paginate_collection("tv", sort_dict, page, page_size)
+        filter_dict = {"genres": {"$in": [genre_filter]}} if genre_filter else {}
+        results, dbs_checked, total_count = await self._paginate_collection(
+            "movie", sort_dict, page, page_size, filter_dict=filter_dict
+        )
         total_pages = (total_count + page_size - 1) // page_size
-
         return {
             "total_count": total_count,
             "total_pages": total_pages,
             "databases_checked": dbs_checked,
             "current_page": page,
-            "tv_shows": [convert_objectid_to_str(result) for result in results]
+            "movies": [convert_objectid_to_str(result) for result in results],
         }
 
-    async def sort_movies(
-        self, sort_params: List[Tuple[str, str]], page: int, page_size: int
-    ) -> dict:
+    async def sort_tv_shows(self, sort_params, page, page_size, genre_filter=None):
         sort_dict = self._get_sort_dict(sort_params)
-        results, dbs_checked, total_count = await self._paginate_collection("movie", sort_dict, page, page_size)
+        filter_dict = {"genres": {"$in": [genre_filter]}} if genre_filter else {}
+        results, dbs_checked, total_count = await self._paginate_collection(
+            "tv", sort_dict, page, page_size, filter_dict=filter_dict
+        )
         total_pages = (total_count + page_size - 1) // page_size
-
         return {
             "total_count": total_count,
             "total_pages": total_pages,
             "databases_checked": dbs_checked,
             "current_page": page,
-            "movies": [convert_objectid_to_str(result) for result in results]
+            "tv_shows": [convert_objectid_to_str(result) for result in results],
         }
 
 
@@ -565,9 +582,6 @@ class Database:
                 movie_doc["type"] = "movie"
                 return movie_doc
             return None
-
-
-
 
 
     # -------------------------------

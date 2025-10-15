@@ -298,6 +298,9 @@ Follow the instructions provided in the Google Colab Tool to deploy on Heroku.
 
 ## 🐳 VPS Guide
 
+This section explains how to deploy your **Telegram Stremio Media Server** on a VPS using **Docker Compose (recommended)** or **Docker**.
+
+
 ### 1️⃣ Step 1: Clone & Configure the Project
 
 ```bash
@@ -307,32 +310,83 @@ mv sample_config.env config.env
 nano config.env
 ```
 
-- Fill in all required variables in `config.env`.
-- Press `Ctrl + O`, then `Enter`, then `Ctrl + X` to save and exit.
+* Fill in all required variables in `config.env`.
+* Press `Ctrl + O`, then `Enter`, then `Ctrl + X` to save and exit.
 
-### 2️⃣ Step 2: Deploy with Docker
+## ⚙️ Step 2: Choose Your Deployment Method
+
+You can deploy the server using either **Docker Compose (recommended)** or **plain Docker**.
+
+
+
+### 🟢 **Option 1: Deploy with Docker Compose (Recommended)**
+
+Docker Compose provides an easier and more maintainable setup, environment mounting, and restart policies.
+
+#### 🚀 Start the Container
 
 ```bash
-docker build -t tsms .
-docker run -d -p 8000:8000 tsms
+docker compose up -d
 ```
 
-Your Code should now be running at:  
+Your server will now be running at:
 ➡️ `http://<your-vps-ip>:8000`
 
------
+---
 
-### 🌐 Step 3: Add Domain
+#### 🛠️ Update `config.env` While Running
 
-#### A. Set Up DNS Records
+If you need to modify environment values (like `BASE_URL`, `AUTH_CHANNEL`, etc.):
 
-Go to your domain's DNS settings and add the following **A record**:
+1. **Edit the file:**
+
+   ```bash
+   nano config.env
+   ```
+2. **Save your changes:** (`Ctrl + O`, `Enter`, `Ctrl + X`)
+3. **Restart the container to apply updates:**
+
+   ```bash
+   docker compose restart
+   ```
+
+⚡ Since the config file is mounted, you **don’t need to rebuild** the image — changes apply automatically on restart.
+
+
+
+### 🔵 **Option 2: Deploy with Docker (Manual Method)**
+
+If you prefer not to use Docker Compose, you can manually build and run the container.
+
+#### 🧩 Build the Image
+
+```bash
+docker build -t telegram-stremio .
+```
+
+#### 🚀 Run the Container
+
+```bash
+docker run -d -p 8000:8000 telegram-stremio
+```
+
+Your server should now be running at:
+➡️ `http://<your-vps-ip>:8000`
+
+
+
+### 🌐 Step 3: Add Domain (Required)
+
+#### 🅰️ Set Up DNS Records
+
+Go to your domain registrar and add an **A record** pointing to your VPS IP:
 
 | Type | Name | Value             |
-|------|------|-------------------|
+| ---- | ---- | ----------------- |
 | A    | @    | `195.xxx.xxx.xxx` |
 
-#### B. Install Caddy
+
+#### 🧱 Install Caddy (for HTTPS + Reverse Proxy)
 
 ```bash
 sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
@@ -344,35 +398,34 @@ sudo apt update
 sudo apt install caddy
 ```
 
-#### C. Configure Caddy
+#### ⚙️ Configure Caddy
 
-1.  **Edit the Caddyfile:**
+1. **Edit the Caddyfile:**
 
-    ```bash
-    sudo nano /etc/caddy/Caddyfile
-    ```
+   ```bash
+   sudo nano /etc/caddy/Caddyfile
+   ```
 
-    Replace the contents with the following:
-    - Replace `domain.com` with your actual domain
-    - If you changed PORT in config.env from the default 8000, update the port accordingly
+2. **Replace contents with:**
 
-    ```caddy
-    domain.com {
-        reverse_proxy localhost:8000
-    }
-    ```
+   ```caddy
+   your-domain.com {
+       reverse_proxy localhost:8000
+   }
+   ```
 
-    Press `Ctrl + O`, then `Enter`, then `Ctrl + X` to save and exit.
+   * Replace `your-domain.com` with your actual domain name.
+   * Adjust the port if you changed it in `config.env`.
 
-2.  **Reload Caddy:**
+3. **Save and reload Caddy:**
 
-    ```bash
-    sudo systemctl reload caddy
-    ```
+   ```bash
+   sudo systemctl reload caddy
+   ```
 
 
-Your API is now available at:  
-➡️ `https://domain.com`
+✅ Your API will now be available securely at:
+➡️ `https://your-domain.com`
 
 
 # 📺 Setting up Stremio
