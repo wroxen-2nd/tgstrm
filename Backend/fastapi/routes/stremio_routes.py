@@ -55,7 +55,7 @@ async def get_manifest():
                 "id": "latest_movies",
                 "name": "Latest",
                 "extra": [
-                    {"name": "genre", "isRequired": False},
+                    {"name": "genre"},
                     {"name": "skip"}
                 ],
                 "genres": GENRES
@@ -65,7 +65,7 @@ async def get_manifest():
                 "id": "top_movies",
                 "name": "Popular",
                 "extra": [
-                    {"name": "genre", "isRequired": False},
+                    {"name": "genre"},
                     {"name": "skip"},
                     {"name": "search"}
                 ],
@@ -76,7 +76,7 @@ async def get_manifest():
                 "id": "latest_series",
                 "name": "Latest",
                 "extra": [
-                    {"name": "genre", "isRequired": False},
+                    {"name": "genre"},
                     {"name": "skip"}
                 ],
                 "genres": GENRES
@@ -86,7 +86,7 @@ async def get_manifest():
                 "id": "top_series",
                 "name": "Popular",
                 "extra": [
-                    {"name": "genre", "isRequired": False},
+                    {"name": "genre"},
                     {"name": "skip"},
                     {"name": "search"}
                 ],
